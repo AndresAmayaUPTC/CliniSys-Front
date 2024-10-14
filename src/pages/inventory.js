@@ -33,7 +33,7 @@ const Inventory = () => {
       const filtered = products.filter(product => {
         const matchesSupplier = supplier ? product.supplier.toLowerCase().includes(supplier.toLowerCase()) : true;
         const matchesDate = date ? product.date === date : true;
-        return matchesSupplier && matchesDate;
+        return matchesSupplier || matchesDate;
       });
       setFilteredProducts(filtered);
     }
