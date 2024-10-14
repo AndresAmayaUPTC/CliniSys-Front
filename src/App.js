@@ -5,6 +5,7 @@ import Home from './pages/home';
 import Register from './pages/register'; 
 import Inventory from './pages/inventory';
 import Billing from './pages/billing';
+import Appointments from './pages/appointments';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,6 +25,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/billing" element={<Billing />} />
+        <Route path="/appointments" element={<Appointments />} />
         <Route 
           path="/" 
           element={isAuthenticated ? <Home onLogout={handleLogout} /> : <Navigate to="/login" />} 
