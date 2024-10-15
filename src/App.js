@@ -9,7 +9,7 @@ import Appointments from './pages/appointments';
 import FinancialReports from './pages/financialReports';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
