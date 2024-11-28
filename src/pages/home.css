@@ -1,120 +1,117 @@
-
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f8f9fa;
-  }
-  
+  font-family: 'Roboto', sans-serif;
+  background-color: #f8f9fa;
+  padding-top: 56px; 
+}
 
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+.sidebar {
+  position: fixed;
+  top: 56px; 
+  bottom: 0;
+  left: -250px;
+  width: 250px;
+  z-index: 1000;
+  padding: 0;
+  background-color: #fff;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+  transition: all 0.3s;
+  overflow-y: auto;
+}
+
+.sidebar.show {
+  left: 0;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.sidebar-overlay.show {
+  display: block;
+}
+
+.sidebar .nav-link {
+  color: #495057;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+  color: var(--bs-primary);
+}
+
+.content {
+  padding-top: 20px;
+  transition: margin-left 0.3s;
+}
+
+.card {
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  height: 100%;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-title {
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+
+.btn-outline-primary {
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--bs-primary);
+  color: #ffffff;
+}
+
+h1.h2 {
+  color: var(--bs-primary);
+  margin-bottom: 20px;
+}
+
+@media (min-width: 992px) {
   .sidebar {
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    min-height: 100vh;
-    padding-top: 20px;
-    z-index: 1000;
+    left: 0;
   }
-  
-  .sidebar h2 {
-    color: var(--bs-primary);
-    font-weight: 700;
-    padding: 0 15px 20px;
-    border-bottom: 1px solid #e9ecef;
-  }
-  
-  .sidebar .nav-link {
-    color: #495057;
-    padding: 10px 15px;
-    transition: all 0.3s ease;
-  }
-  
-  .sidebar .nav-link:hover,
-  .sidebar .nav-link.active {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
-    color: var(--bs-primary);
-  }
-  
-  
-  .main-content {
-    background-image: url('/public/images/Medical\ Office.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    min-height: 100vh;
-  }
-  
-  .content-overlay {
-    background-color: rgba(255, 255, 255, 0.85);
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    margin: 20px;
-    padding: 30px;
-  }
-  
-  .content-overlay h1 {
-    color: var(--bs-primary);
-    margin-bottom: 20px;
-  }
-  
-  
-  .card {
-    transition: all 0.3s ease;
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: rgba(255, 255, 255, 0.9);
-  }
-  
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .card-title {
-    color: var(--bs-primary);
-    font-weight: 600;
-  }
-  
 
-  .search-container {
-    position: relative;
-    margin-bottom: 30px;
+  .content {
+    margin-left: 250px;
   }
-  
-  .search-container input {
-    padding-left: 40px;
-    border-radius: 20px;
-    border: 1px solid #ced4da;
-    background-color: rgba(255, 255, 255, 0.9);
-  }
-  
-  .search-container .search-icon {
-    position: absolute;
-    top: 50%;
-    left: 15px;
-    transform: translateY(-50%);
-    color: #6c757d;
-  }
-  
+}
 
-  .btn-logout {
-    background-color: rgba(255, 255, 255, 0.9);
-    color: #dc3545;
-    border: 1px solid #dc3545;
-    transition: all 0.3s ease;
+@media (max-width: 991.98px) {
+  .sidebar-header {
+    display: flex !important;
   }
-  
-  .btn-logout:hover {
-    background-color: #dc3545;
-    color: #ffffff;
-  }
-  
 
-  @media (max-width: 768px) {
-    .sidebar {
-      width: 100% !important;
-      min-height: auto;
-    }
-  
-    .content-overlay {
-      margin: 10px;
-      padding: 15px;
-    }
+  .content {
+    margin-left: 0 !important;
   }
+}

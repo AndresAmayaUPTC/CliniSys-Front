@@ -7,6 +7,7 @@ import Inventory from './pages/inventory';
 import Billing from './pages/billing';
 import Appointments from './pages/appointments';
 import FinancialReports from './pages/financialReports';
+import Landing from './pages/landing';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -22,6 +23,8 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/landing" element={<Landing />} />
+
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register />} />
         <Route path="/inventory" element={<Inventory />} />
