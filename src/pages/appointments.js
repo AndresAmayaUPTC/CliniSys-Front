@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Table, Form, Button, Modal, Card, Alert } from 'react-bootstrap';
 import { Search, Calendar, ChevronLeft, ChevronRight, Edit2, Trash2, Plus } from 'lucide-react';
-
+import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar';
 
 const initialAppointments = [
   { id: 2335, date: '2024-03-15', time: '13:45', patient: 'Juan Carlos Victoria' },
@@ -29,10 +30,24 @@ const AppointmentsPage = () => {
     patient: '',
   });
   const [errorMessage, setErrorMessage] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     filterAndSortAppointments();
   }, [searchTerm, dateFilter, sortOrder, appointments]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 992) {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const filterAndSortAppointments = () => {
     let filtered = appointments;
@@ -45,7 +60,6 @@ const AppointmentsPage = () => {
       filtered = filtered.filter(app => app.date === dateFilter);
     }
     
-    // Sorting
     filtered.sort((a, b) => {
       const dateComparison = a.date.localeCompare(b.date);
       if (dateComparison !== 0) return sortOrder === 'asc' ? dateComparison : -dateComparison;
@@ -108,190 +122,197 @@ const AppointmentsPage = () => {
   };
 
   return (
-    <Container fluid className="py-4">
-      <Card className="shadow">
-        <Card.Body>
-          <Row className="mb-4 align-items-center">
-            <Col>
-              <h2 className="mb-0 text-primary">Citas médicas</h2>
-            </Col>
-            <Col xs="auto">
-              <Button variant="primary" onClick={handleScheduleAppointment}>
-                <Plus size={18} className="me-2" />
-                Agendar cita
-              </Button>
-            </Col>
-          </Row>
-          <Row className="mb-4 g-3">
-            <Col md={3}>
-              <Form.Group>
-                <Form.Control
-                  type="date"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="border-0 shadow-sm"
-                />
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-                className="border-0 shadow-sm"
-              >
-                <option value="asc">Orden ascendente</option>
-                <option value="desc">Orden descendente</option>
-              </Form.Select>
-            </Col>
-            <Col md={3}>
-              <div className="input-group">
-                <span className="input-group-text border-0 bg-white">
-                  <Search size={18} />
-                </span>
-                <Form.Control
-                  type="text"
-                  placeholder="Buscar paciente"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border-0 shadow-sm"
-                />
-              </div>
-            </Col>
-          </Row>
-          <Table responsive hover className="align-middle">
-            <thead className="bg-light">
-              <tr>
-                <th>#</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Paciente</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAppointments.map((appointment) => (
-                <tr key={appointment.id}>
-                  <td>{appointment.id}</td>
-                  <td>{appointment.date}</td>
-                  <td>{appointment.time}</td>
-                  <td>{appointment.patient}</td>
-                  <td>
-                    <Button variant="link" className="text-primary p-0 me-2" onClick={() => handleEditAppointment(appointment)}>
-                      <Edit2 size={18} />
-                    </Button>
-                    <Button variant="link" className="text-danger p-0" onClick={() => handleDeleteAppointment(appointment.id)}>
-                      <Trash2 size={18} />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-          <Row className="justify-content-between mt-3">
-            <Col xs="auto">
-              <p className="text-muted mb-0">Mostrando 1 a {filteredAppointments.length} de {appointments.length} registros</p>
-            </Col>
-            <Col xs="auto">
-              <Button variant="outline-secondary" size="sm" className="me-2">
-                <ChevronLeft size={18} />
-              </Button>
-              <Button variant="primary" size="sm" className="me-2">1</Button>
-              <Button variant="outline-secondary" size="sm">
-                <ChevronRight size={18} />
-              </Button>
-            </Col>
-          </Row>
-        </Card.Body>
-      </Card>
+    <div className="min-vh-100 bg-light">
+      <Navbar toggleSidebar={toggleSidebar} />
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
-      {/* Modal para editar cita */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Editar Cita</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Fecha</Form.Label>
-              <Form.Control
-                type="date"
-                value={editingAppointment?.date || ''}
-                onChange={(e) => setEditingAppointment({...editingAppointment, date: e.target.value})}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Hora</Form.Label>
-              <Form.Control
-                type="time"
-                value={editingAppointment?.time || ''}
-                onChange={(e) => setEditingAppointment({...editingAppointment, time: e.target.value})}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Paciente</Form.Label>
-              <Form.Control
-                type="text"
-                value={editingAppointment?.patient || ''}
-                onChange={(e) => setEditingAppointment({...editingAppointment, patient: e.target.value})}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={handleSaveEdit}>
-            Guardar Cambios
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <main className="content">
+        <Container fluid className="py-4">
+          <Card className="shadow">
+            <Card.Body>
+              <Row className="mb-4 align-items-center">
+                <Col>
+                  <h2 className="mb-0 text-primary">Citas médicas</h2>
+                </Col>
+                <Col xs="auto">
+                  <Button variant="primary" onClick={handleScheduleAppointment}>
+                    <Plus size={18} className="me-2" />
+                    Agendar cita
+                  </Button>
+                </Col>
+              </Row>
+              <Row className="mb-4 g-3">
+                <Col md={3}>
+                  <Form.Group>
+                    <Form.Control
+                      type="date"
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      className="border-0 shadow-sm"
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={3}>
+                  <Form.Select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    className="border-0 shadow-sm"
+                  >
+                    <option value="asc">Orden ascendente</option>
+                    <option value="desc">Orden descendente</option>
+                  </Form.Select>
+                </Col>
+                <Col md={3}>
+                  <div className="input-group">
+                    <span className="input-group-text border-0 bg-white">
+                      <Search size={18} />
+                    </span>
+                    <Form.Control
+                      type="text"
+                      placeholder="Buscar paciente"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="border-0 shadow-sm"
+                    />
+                  </div>
+                </Col>
+              </Row>
+              <Table responsive hover className="align-middle">
+                <thead className="bg-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Paciente</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAppointments.map((appointment) => (
+                    <tr key={appointment.id}>
+                      <td>{appointment.id}</td>
+                      <td>{appointment.date}</td>
+                      <td>{appointment.time}</td>
+                      <td>{appointment.patient}</td>
+                      <td>
+                        <Button variant="link" className="text-primary p-0 me-2" onClick={() => handleEditAppointment(appointment)}>
+                          <Edit2 size={18} />
+                        </Button>
+                        <Button variant="link" className="text-danger p-0" onClick={() => handleDeleteAppointment(appointment.id)}>
+                          <Trash2 size={18} />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              <Row className="justify-content-between mt-3">
+                <Col xs="auto">
+                  <p className="text-muted mb-0">Mostrando 1 a {filteredAppointments.length} de {appointments.length} registros</p>
+                </Col>
+                <Col xs="auto">
+                  <Button variant="outline-secondary" size="sm" className="me-2">
+                    <ChevronLeft size={18} />
+                  </Button>
+                  <Button variant="primary" size="sm" className="me-2">1</Button>
+                  <Button variant="outline-secondary" size="sm">
+                    <ChevronRight size={18} />
+                  </Button>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
 
-      {/* Modal para agregar cita */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Agendar Nueva Cita</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Fecha</Form.Label>
-              <Form.Control
-                type="date"
-                value={newAppointment.date}
-                onChange={(e) => setNewAppointment({...newAppointment, date: e.target.value})}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Hora</Form.Label>
-              <Form.Control
-                type="time"
-                value={newAppointment.time}
-                onChange={(e) => setNewAppointment({...newAppointment, time: e.target.value})}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Paciente</Form.Label>
-              <Form.Control
-                type="text"
-                value={newAppointment.patient}
-                onChange={(e) => setNewAppointment({...newAppointment, patient: e.target.value})}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={handleAddAppointment}>
-            Agendar Cita
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+          {/* Modal para editar cita */}
+          <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Editar Cita</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label>Fecha</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={editingAppointment?.date || ''}
+                    onChange={(e) => setEditingAppointment({...editingAppointment, date: e.target.value})}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Hora</Form.Label>
+                  <Form.Control
+                    type="time"
+                    value={editingAppointment?.time || ''}
+                    onChange={(e) => setEditingAppointment({...editingAppointment, time: e.target.value})}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Paciente</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={editingAppointment?.patient || ''}
+                    onChange={(e) => setEditingAppointment({...editingAppointment, patient: e.target.value})}
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+                Cancelar
+              </Button>
+              <Button variant="primary" onClick={handleSaveEdit}>
+                Guardar Cambios
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          {/* Modal para agregar cita */}
+          <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Agendar Nueva Cita</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label>Fecha</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={newAppointment.date}
+                    onChange={(e) => setNewAppointment({...newAppointment, date: e.target.value})}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Hora</Form.Label>
+                  <Form.Control
+                    type="time"
+                    value={newAppointment.time}
+                    onChange={(e) => setNewAppointment({...newAppointment, time: e.target.value})}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Paciente</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={newAppointment.patient}
+                    onChange={(e) => setNewAppointment({...newAppointment, patient: e.target.value})}
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+                Cancelar
+              </Button>
+              <Button variant="primary" onClick={handleAddAppointment}>
+                Agendar Cita
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        </Container>
+      </main>
+    </div>
   );
 };
 

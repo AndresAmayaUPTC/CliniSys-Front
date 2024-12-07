@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Table, Alert } from 'react-bootstrap';
 import { Search, Package } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar';
 
 const Inventory = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [supplier, setSupplier] = useState('');
   const [date, setDate] = useState('');
   const [showError, setShowError] = useState(false);
@@ -13,6 +16,27 @@ const Inventory = () => {
   ]);
 
   const [filteredProducts, setFilteredProducts] = useState(products);
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 992) {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [sidebarOpen]);
 
   const handleSearchChange = (e) => {
     const { name, value } = e.target;
@@ -40,102 +64,102 @@ const Inventory = () => {
   };
 
   return (
-    <Container fluid className="py-5 bg-light min-vh-100">
-      <Row className="justify-content-center">
-        <Col md={10} lg={8}>
-          <Card className="shadow-lg">
-            <Card.Body className="p-4">
-              
-              <h2 className="mb-4 text-left text-primary">Inventario</h2>
+    <div className="min-vh-100 bg-light">
+      <Navbar toggleSidebar={toggleSidebar} />
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
-              
-              {showError && (
-                <Alert variant="danger">
-                  Por favor, ingrese al menos un criterio de búsqueda.
-                </Alert>
-              )}
+      <main className="content">
+        <Container fluid className="py-5">
+          <Row className="justify-content-center">
+            <Col md={10} lg={8}>
+              <Card className="shadow-lg">
+                <Card.Body className="p-4">
+                  <h2 className="mb-4 text-left text-primary">Inventario</h2>
 
-              
-              <Form onSubmit={handleSearch}>
-                <Row className="align-items-end">
-                  
-                  <Col md={5} className="mb-3">
-                    <Form.Label>Buscar por Proveedor</Form.Label>
-                    <div className="input-group">
-                      <span className="input-group-text">
-                        <Package size={18} />
-                      </span>
-                      <Form.Control
-                        type="text"
-                        name="supplier"
-                        placeholder="Ingrese el nombre del proveedor"
-                        value={supplier}
-                        onChange={handleSearchChange}
-                      />
-                    </div>
-                  </Col>
-
-                  
-                  <Col md={5} className="mb-3">
-                    <Form.Label>Buscar por Fecha</Form.Label>
-                    <div className="input-group">
-                      <span className="input-group-text">
-                        <Search size={18} />
-                      </span>
-                      <Form.Control
-                        type="date"
-                        name="date"
-                        value={date}
-                        onChange={handleSearchChange}
-                      />
-                    </div>
-                  </Col>
-
-                  
-                  <Col md={2} className="mb-3 text-center">
-                    <Button variant="primary" type="submit" className="w-100">
-                      Buscar
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-
-              
-              <Table striped bordered hover responsive className="mt-4">
-                <thead className="table-primary">
-                  <tr>
-                    <th>#</th>
-                    <th>Nombre del Producto</th>
-                    <th>Proveedor</th>
-                    <th>Fecha</th>
-                    <th>Cantidad</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.length > 0 ? (
-                    filteredProducts.map(product => (
-                      <tr key={product.id}>
-                        <td>{product.id}</td>
-                        <td>{product.name}</td>
-                        <td>{product.supplier}</td>
-                        <td>{product.date}</td>
-                        <td>{product.quantity}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="text-center">
-                        No se encontraron productos.
-                      </td>
-                    </tr>
+                  {showError && (
+                    <Alert variant="danger">
+                      Por favor, ingrese al menos un criterio de búsqueda.
+                    </Alert>
                   )}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+
+                  <Form onSubmit={handleSearch}>
+                    <Row className="align-items-end">
+                      <Col md={5} className="mb-3">
+                        <Form.Label>Buscar por Proveedor</Form.Label>
+                        <div className="input-group">
+                          <span className="input-group-text">
+                            <Package size={18} />
+                          </span>
+                          <Form.Control
+                            type="text"
+                            name="supplier"
+                            placeholder="Ingrese el nombre del proveedor"
+                            value={supplier}
+                            onChange={handleSearchChange}
+                          />
+                        </div>
+                      </Col>
+
+                      <Col md={5} className="mb-3">
+                        <Form.Label>Buscar por Fecha</Form.Label>
+                        <div className="input-group">
+                          <span className="input-group-text">
+                            <Search size={18} />
+                          </span>
+                          <Form.Control
+                            type="date"
+                            name="date"
+                            value={date}
+                            onChange={handleSearchChange}
+                          />
+                        </div>
+                      </Col>
+
+                      <Col md={2} className="mb-3 text-center">
+                        <Button variant="primary" type="submit" className="w-100">
+                          Buscar
+                        </Button>
+                      </Col>
+                    </Row>
+                  </Form>
+
+                  <Table striped bordered hover responsive className="mt-4">
+                    <thead className="table-primary">
+                      <tr>
+                        <th>#</th>
+                        <th>Nombre del Producto</th>
+                        <th>Proveedor</th>
+                        <th>Fecha</th>
+                        <th>Cantidad</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProducts.length > 0 ? (
+                        filteredProducts.map(product => (
+                          <tr key={product.id}>
+                            <td>{product.id}</td>
+                            <td>{product.name}</td>
+                            <td>{product.supplier}</td>
+                            <td>{product.date}</td>
+                            <td>{product.quantity}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="text-center">
+                            No se encontraron productos.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </Table>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </main>
+    </div>
   );
 };
 
