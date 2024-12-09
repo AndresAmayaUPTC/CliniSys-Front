@@ -3,21 +3,14 @@ import { Container, Row, Col, Table, Form, Button, Modal, Card, Alert } from 're
 import { Search, Calendar, ChevronLeft, ChevronRight, Edit2, Trash2, Plus } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
+import axios from 'axios';
 
-const initialAppointments = [
-  { id: 2335, date: '2024-03-15', time: '13:45', patient: 'Juan Carlos Victoria' },
-  { id: 2332, date: '2024-03-27', time: '16:30', patient: 'Carlos Oliveros' },
-  { id: 2331, date: '2024-04-03', time: '14:45', patient: 'Juan Carlos Victoria' },
-  { id: 2330, date: '2024-04-05', time: '13:00', patient: 'David Perez Guzman' },
-  { id: 2329, date: '2024-04-15', time: '17:45', patient: 'David Perez Guzman' },
-  { id: 2327, date: '2024-04-26', time: '20:15', patient: 'Jorge Rojas' },
-  { id: 2318, date: '2024-05-13', time: '18:00', patient: 'Juan Perez' },
-  { id: 1952, date: '2024-05-16', time: '15:00', patient: 'Francisco Gonzalez' },
-];
+const API_BASE_URL = 'https://hospital-hospital.up.railway.app';
 
 const AppointmentsPage = () => {
-  const [appointments, setAppointments] = useState(initialAppointments);
-  const [filteredAppointments, setFilteredAppointments] = useState(appointments);
+  const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -25,45 +18,64 @@ const AppointmentsPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [newAppointment, setNewAppointment] = useState({
-    date: '',
-    time: '',
-    patient: '',
+    paciente: { id: 0 },
+    fecha: '',
+    motivo: '',
+    estado: 'pendiente'
   });
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    fetchAppointments();
+    fetchPatients();
+  }, []);
 
   useEffect(() => {
     filterAndSortAppointments();
   }, [searchTerm, dateFilter, sortOrder, appointments]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 992) {
-        setSidebarOpen(false);
+  const fetchAppointments = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/cita`);
+      if (response.data.status === 'OK') {
+        setAppointments(response.data.data);
+      } else {
+        setErrorMessage('Error al cargar las citas');
       }
-    };
+    } catch (error) {
+      setErrorMessage('Error al conectar con el servidor');
+    }
+  };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const fetchPatients = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/paciente`);
+      if (response.data.status === 'OK') {
+        setPatients(response.data.data);
+      } else {
+        setErrorMessage('Error al cargar los pacientes');
+      }
+    } catch (error) {
+      setErrorMessage('Error al conectar con el servidor');
+    }
+  };
 
   const filterAndSortAppointments = () => {
     let filtered = appointments;
     if (searchTerm) {
       filtered = filtered.filter(app => 
-        app.patient.toLowerCase().includes(searchTerm.toLowerCase())
+        app.motivo.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     if (dateFilter) {
-      filtered = filtered.filter(app => app.date === dateFilter);
+      filtered = filtered.filter(app => app.fecha.startsWith(dateFilter));
     }
     
     filtered.sort((a, b) => {
-      const dateComparison = a.date.localeCompare(b.date);
-      if (dateComparison !== 0) return sortOrder === 'asc' ? dateComparison : -dateComparison;
-      return sortOrder === 'asc' ? a.time.localeCompare(b.time) : b.time.localeCompare(a.time);
+      const dateComparison = a.fecha.localeCompare(b.fecha);
+      return sortOrder === 'asc' ? dateComparison : -dateComparison;
     });
 
     setFilteredAppointments(filtered);
@@ -73,30 +85,30 @@ const AppointmentsPage = () => {
     setShowAddModal(true);
   };
 
-  const isAppointmentValid = (date, time) => {
-    const appointmentDateTime = new Date(`${date}T${time}`);
-    return appointments.every(app => {
-      const existingDateTime = new Date(`${app.date}T${app.time}`);
-      const timeDiff = Math.abs(appointmentDateTime - existingDateTime) / 60000; 
-      return timeDiff >= 20;
-    });
-  };
-
-  const handleAddAppointment = () => {
-    if (!isAppointmentValid(newAppointment.date, newAppointment.time)) {
-      setErrorMessage('La cita debe tener al menos 20 minutos de diferencia con otras citas.');
-      return;
+  const handleAddAppointment = async () => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/cita`, newAppointment);
+      if (response.data.status === 'OK') {
+        const updatedAppointment = {
+          ...response.data.data,
+          paciente: patients.find(p => p.id === response.data.data.paciente.id)
+        };
+        setAppointments([...appointments, updatedAppointment]);
+        setShowAddModal(false);
+        setNewAppointment({
+          paciente: { id: 0 },
+          fecha: '',
+          motivo: '',
+          estado: 'pendiente'
+        });
+        setSuccessMessage('Cita agregada correctamente');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setErrorMessage('Error al agregar la cita');
+      }
+    } catch (error) {
+      setErrorMessage('Error al conectar con el servidor');
     }
-
-    const id = Math.max(...appointments.map(a => a.id)) + 1;
-    setAppointments([...appointments, { ...newAppointment, id }]);
-    setShowAddModal(false);
-    setNewAppointment({
-      date: '',
-      time: '',
-      patient: '',
-    });
-    setErrorMessage('');
   };
 
   const handleEditAppointment = (appointment) => {
@@ -104,22 +116,46 @@ const AppointmentsPage = () => {
     setShowEditModal(true);
   };
 
-  const handleDeleteAppointment = (id) => {
-    setAppointments(appointments.filter(app => app.id !== id));
-  };
-
-  const handleSaveEdit = () => {
-    if (!isAppointmentValid(editingAppointment.date, editingAppointment.time)) {
-      setErrorMessage('La cita debe tener al menos 20 minutos de diferencia con otras citas.');
-      return;
+  const handleDeleteAppointment = async (id) => {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/cita/${id}`);
+      if (response.data.status === 'OK') {
+        setAppointments(appointments.filter(app => app.id !== id));
+        setSuccessMessage('Cita eliminada correctamente');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setErrorMessage('Error al eliminar la cita');
+      }
+    } catch (error) {
+      setErrorMessage('Error al conectar con el servidor');
     }
-
-    setAppointments(appointments.map(app => 
-      app.id === editingAppointment.id ? editingAppointment : app
-    ));
-    setShowEditModal(false);
-    setErrorMessage('');
   };
+
+  const handleSaveEdit = async () => {
+    if (editingAppointment) {
+      try {
+        const response = await axios.put(`${API_BASE_URL}/cita`, editingAppointment);
+        if (response.data.status === 'OK') {
+          const updatedAppointment = {
+            ...response.data.data,
+            paciente: patients.find(p => p.id === response.data.data.paciente.id)
+          };
+          setAppointments(appointments.map(app => 
+            app.id === updatedAppointment.id ? updatedAppointment : app
+          ));
+          setShowEditModal(false);
+          setSuccessMessage('Cita actualizada correctamente');
+          setTimeout(() => setSuccessMessage(''), 3000);
+        } else {
+          setErrorMessage('Error al actualizar la cita');
+        }
+      } catch (error) {
+        setErrorMessage('Error al conectar con el servidor');
+      }
+    }
+  };
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
     <div className="min-vh-100 bg-light">
@@ -130,6 +166,8 @@ const AppointmentsPage = () => {
         <Container fluid className="py-4">
           <Card className="shadow">
             <Card.Body>
+              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+              {successMessage && <Alert variant="success">{successMessage}</Alert>}
               <Row className="mb-4 align-items-center">
                 <Col>
                   <h2 className="mb-0 text-primary">Citas médicas</h2>
@@ -169,7 +207,7 @@ const AppointmentsPage = () => {
                     </span>
                     <Form.Control
                       type="text"
-                      placeholder="Buscar paciente"
+                      placeholder="Buscar motivo"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="border-0 shadow-sm"
@@ -182,7 +220,8 @@ const AppointmentsPage = () => {
                   <tr>
                     <th>#</th>
                     <th>Fecha</th>
-                    <th>Hora</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
                     <th>Paciente</th>
                     <th>Acciones</th>
                   </tr>
@@ -191,9 +230,10 @@ const AppointmentsPage = () => {
                   {filteredAppointments.map((appointment) => (
                     <tr key={appointment.id}>
                       <td>{appointment.id}</td>
-                      <td>{appointment.date}</td>
-                      <td>{appointment.time}</td>
-                      <td>{appointment.patient}</td>
+                      <td>{new Date(appointment.fecha).toLocaleString()}</td>
+                      <td>{appointment.motivo}</td>
+                      <td>{appointment.estado}</td>
+                      <td>{`${appointment.paciente.nombre} ${appointment.paciente.apellido}`}</td>
                       <td>
                         <Button variant="link" className="text-primary p-0 me-2" onClick={() => handleEditAppointment(appointment)}>
                           <Edit2 size={18} />
@@ -229,31 +269,47 @@ const AppointmentsPage = () => {
               <Modal.Title>Editar Cita</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
               <Form>
                 <Form.Group className="mb-3">
                   <Form.Label>Fecha</Form.Label>
                   <Form.Control
-                    type="date"
-                    value={editingAppointment?.date || ''}
-                    onChange={(e) => setEditingAppointment({...editingAppointment, date: e.target.value})}
+                    type="datetime-local"
+                    value={editingAppointment?.fecha.slice(0, 16) || ''}
+                    onChange={(e) => setEditingAppointment(editingAppointment ? {...editingAppointment, fecha: e.target.value} : null)}
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Label>Hora</Form.Label>
+                  <Form.Label>Motivo</Form.Label>
                   <Form.Control
-                    type="time"
-                    value={editingAppointment?.time || ''}
-                    onChange={(e) => setEditingAppointment({...editingAppointment, time: e.target.value})}
+                    type="text"
+                    value={editingAppointment?.motivo || ''}
+                    onChange={(e) => setEditingAppointment(editingAppointment ? {...editingAppointment, motivo: e.target.value} : null)}
                   />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Estado</Form.Label>
+                  <Form.Select
+                    value={editingAppointment?.estado || ''}
+                    onChange={(e) => setEditingAppointment(editingAppointment ? {...editingAppointment, estado: e.target.value} : null)}
+                  >
+                    <option value="pendiente">Pendiente</option>
+                    <option value="confirmada">Confirmada</option>
+                    <option value="cancelada">Cancelada</option>
+                  </Form.Select>
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Paciente</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={editingAppointment?.patient || ''}
-                    onChange={(e) => setEditingAppointment({...editingAppointment, patient: e.target.value})}
-                  />
+                  <Form.Select
+                    value={editingAppointment?.paciente.id || ''}
+                    onChange={(e) => setEditingAppointment(editingAppointment ? {...editingAppointment, paciente: { id: parseInt(e.target.value) }} : null)}
+                  >
+                    <option value="">Seleccione un paciente</option>
+                    {patients.map(patient => (
+                      <option key={patient.id} value={patient.id}>
+                        {`${patient.id} - ${patient.nombre} ${patient.apellido}`}
+                      </option>
+                    ))}
+                  </Form.Select>
                 </Form.Group>
               </Form>
             </Modal.Body>
@@ -273,31 +329,47 @@ const AppointmentsPage = () => {
               <Modal.Title>Agendar Nueva Cita</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
               <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label>Paciente</Form.Label>
+                  <Form.Select
+                    value={newAppointment.paciente.id}
+                    onChange={(e) => setNewAppointment({...newAppointment, paciente: { id: parseInt(e.target.value) }})}
+                  >
+                    <option value="">Seleccione un paciente</option>
+                    {patients.map(patient => (
+                      <option key={patient.id} value={patient.id}>
+                        {`${patient.id} - ${patient.nombre} ${patient.apellido}`}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Fecha</Form.Label>
                   <Form.Control
-                    type="date"
-                    value={newAppointment.date}
-                    onChange={(e) => setNewAppointment({...newAppointment, date: e.target.value})}
+                    type="datetime-local"
+                    value={newAppointment.fecha}
+                    onChange={(e) => setNewAppointment({...newAppointment, fecha: e.target.value})}
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Label>Hora</Form.Label>
-                  <Form.Control
-                    type="time"
-                    value={newAppointment.time}
-                    onChange={(e) => setNewAppointment({...newAppointment, time: e.target.value})}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Paciente</Form.Label>
+                  <Form.Label>Motivo</Form.Label>
                   <Form.Control
                     type="text"
-                    value={newAppointment.patient}
-                    onChange={(e) => setNewAppointment({...newAppointment, patient: e.target.value})}
+                    value={newAppointment.motivo}
+                    onChange={(e) => setNewAppointment({...newAppointment, motivo: e.target.value})}
                   />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Estado</Form.Label>
+                  <Form.Select
+                    value={newAppointment.estado}
+                    onChange={(e) => setNewAppointment({...newAppointment, estado: e.target.value})}
+                  >
+                    <option value="pendiente">Pendiente</option>
+                    <option value="confirmada">Confirmada</option>
+                    <option value="cancelada">Cancelada</option>
+                  </Form.Select>
                 </Form.Group>
               </Form>
             </Modal.Body>
