@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, FileText, Package, DollarSign } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import './home.css';
@@ -29,6 +30,28 @@ export default function Home({ onLogout = () => {} }) {
     }
   }, [sidebarOpen]);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100
+      }
+    }
+  };
+
   return (
     <div className="min-vh-100 bg-light">
       <Navbar toggleSidebar={toggleSidebar} onLogout={onLogout} />
@@ -37,12 +60,22 @@ export default function Home({ onLogout = () => {} }) {
       {/* Main Content */}
       <main className="content">
         <div className="container-fluid px-4">
-          <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <motion.div 
+            className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <h1 className="h2 text-primary">Bienvenido al Sistema de Gestión Médico</h1>
-          </div>
+          </motion.div>
 
-          <div className="row g-4">
-            <div className="col-md-6 col-lg-4">
+          <motion.div 
+            className="row g-4"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div className="col-md-6 col-lg-4" variants={itemVariants}>
               <div className="card border-0 shadow-sm h-100">
                 <img src="/images/appointments.jpg" className="card-img-top" alt="Gestión de Citas" />
                 <div className="card-body">
@@ -54,8 +87,8 @@ export default function Home({ onLogout = () => {} }) {
                   <Link to="/appointments" className="btn btn-outline-primary">Ver citas</Link>
                 </div>
               </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
+            </motion.div>
+            <motion.div className="col-md-6 col-lg-4" variants={itemVariants}>
               <div className="card border-0 shadow-sm h-100">
                 <img src="/images/medical-records.jpg" className="card-img-top" alt="Historias Clínicas" />
                 <div className="card-body">
@@ -67,8 +100,8 @@ export default function Home({ onLogout = () => {} }) {
                   <Link to="/" className="btn btn-outline-primary">Ver historias</Link>
                 </div>
               </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
+            </motion.div>
+            <motion.div className="col-md-6 col-lg-4" variants={itemVariants}>
               <div className="card border-0 shadow-sm h-100">
                 <img src="/images/inventory.jpg" className="card-img-top" alt="Inventario" />
                 <div className="card-body">
@@ -80,8 +113,8 @@ export default function Home({ onLogout = () => {} }) {
                   <Link to="/inventory" className="btn btn-outline-primary">Ver inventario</Link>
                 </div>
               </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
+            </motion.div>
+            <motion.div className="col-md-6 col-lg-4" variants={itemVariants}>
               <div className="card border-0 shadow-sm h-100">
                 <img src="/images/billing.jpg" className="card-img-top" alt="Facturación" />
                 <div className="card-body">
@@ -93,8 +126,8 @@ export default function Home({ onLogout = () => {} }) {
                   <Link to="/billing" className="btn btn-outline-primary">Ver facturación</Link>
                 </div>
               </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
+            </motion.div>
+            <motion.div className="col-md-6 col-lg-4" variants={itemVariants}>
               <div className="card border-0 shadow-sm h-100">
                 <img src="/images/financial-reports.jpg" className="card-img-top" alt="Informes Financieros" />
                 <div className="card-body">
@@ -106,8 +139,8 @@ export default function Home({ onLogout = () => {} }) {
                   <Link to="/financialReports" className="btn btn-outline-primary">Ver informes</Link>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </main>
     </div>
