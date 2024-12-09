@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { User, Menu } from 'lucide-react';
 
-const Navbar = ({ toggleSidebar, onLogout }) => {
+const Navbar = ({ toggleSidebar }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -22,6 +23,14 @@ const Navbar = ({ toggleSidebar, onLogout }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const handleLogout = () => {
+    // Clear session
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+    // Redirect to login page
+    navigate('/');
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
@@ -49,7 +58,7 @@ const Navbar = ({ toggleSidebar, onLogout }) => {
           >
             <li><Link to="/profile" className="dropdown-item">Perfil</Link></li>
             <li><hr className="dropdown-divider" /></li>
-            <li><button className="dropdown-item" onClick={onLogout}>Cerrar sesión</button></li>
+            <li><button className="dropdown-item" onClick={handleLogout}>Cerrar sesión</button></li>
           </ul>
         </div>
       </div>

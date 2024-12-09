@@ -1,20 +1,49 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { User, Lock } from 'lucide-react';
-
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showError, setShowError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !password) {
       setShowError(true);
-    } else {
-      setShowError(false);
-      console.log('Intento de inicio de sesión con:', username, password);
+      return;
+    }
+    
+    setShowError(false);
+    setLoading(true);
+    setErrorMessage('');
+
+    try {
+      const response = await axios.post('https://hospital-hospital.up.railway.app/usuario/auth', {
+        nombreUsuario: username,
+        contrasena: password
+      });
+
+      if (response.data.status === 'OK' && response.data.data === true) {
+        console.log('Inicio de sesión exitoso');
+        // Save session
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', username);
+        // Redirect to home page
+        navigate('/home');
+      } else {
+        setErrorMessage('Credenciales inválidas. Por favor, intente de nuevo.');
+      }
+    } catch (error) {
+      console.error('Error durante el inicio de sesión:', error);
+      setErrorMessage('Error al conectar con el servidor. Por favor, intente más tarde.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -25,14 +54,13 @@ const LoginPage = () => {
           <Card className="shadow-lg">
             <Card.Body className="p-5">
               <div className="text-center mb-4">
-               
                 <h2 className="font-weight-bold text-primary">CLINISYS</h2>
                 <p className="text-muted">Sistema de Gestión Médico</p>
               </div>
               
-              {showError && (
+              {(showError || errorMessage) && (
                 <Alert variant="danger">
-                  Por favor, ingrese su nombre de usuario y contraseña.
+                  {showError ? 'Por favor, ingrese su nombre de usuario y contraseña.' : errorMessage}
                 </Alert>
               )}
 
@@ -71,8 +99,8 @@ const LoginPage = () => {
                   <Form.Check type="checkbox" label="Recordarme" />
                 </Form.Group>
 
-                <Button variant="primary" type="submit" className="w-100">
-                  Iniciar Sesión
+                <Button variant="primary" type="submit" className="w-100" disabled={loading}>
+                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </Button>
               </Form>
 

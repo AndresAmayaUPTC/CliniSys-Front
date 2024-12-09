@@ -8,6 +8,7 @@ import Billing from './pages/billing';
 import Appointments from './pages/appointments';
 import FinancialReports from './pages/financialReports';
 import Landing from './pages/landing';
+import Profile from './pages/profile'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/billing" element={<Billing />} />
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/financialReports" element={<FinancialReports />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );
