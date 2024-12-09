@@ -43,7 +43,7 @@ const RegisterPage = () => {
           <Card className="shadow-lg">
             <Card.Body className="p-5">
               <div className="text-center mb-4">
-                <img src="/api/placeholder/150/50" alt="Clinisys Logo" className="mb-3" />
+               
                 <h2 className="font-weight-bold text-primary">CLINISYS</h2>
                 <p className="text-muted">Registro de Usuario</p>
               </div>
