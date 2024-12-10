@@ -97,7 +97,7 @@ export default function Home({ onLogout = () => {} }) {
                     Historias Clínicas
                   </h5>
                   <p className="card-text">Acceda y gestione los registros médicos de sus pacientes.</p>
-                  <Link to="/" className="btn btn-outline-primary">Ver historias</Link>
+                  <Link to="/records" className="btn btn-outline-primary">Ver historias</Link>
                 </div>
               </div>
             </motion.div>

@@ -8,7 +8,9 @@ import Billing from './pages/billing';
 import Appointments from './pages/appointments';
 import FinancialReports from './pages/financialReports';
 import Landing from './pages/landing';
-import Profile from './pages/profile'
+import Profile from './pages/profile';
+import PatientRecords from './pages/patientRecords';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
@@ -23,9 +25,11 @@ function App() {
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/financialReports" element={<FinancialReports />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/records" element={<PatientRecords />} />
       </Routes>
     </Router>
   );
 }
+
 
 export default App;
