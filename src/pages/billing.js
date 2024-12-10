@@ -15,7 +15,9 @@ const Billing = () => {
   const [sales, setSales] = useState([
     { id: 1, patient: 'Juan Pérez', date: '2024-10-01', service: 'Consulta', total: 300 },
     { id: 2, patient: 'Ana López', date: '2024-10-05', service: 'Examen', total: 500 },
-    { id: 3, patient: 'Carlos Ruiz', date: '2024-10-10', service: 'Radiografía', total: 800 },
+    { id: 5, patient: 'Carlos Ruiz', date: '2024-10-10', service: 'Radiografía', total: 800 },
+    { id: 9, patient: 'María Fernández', date: '2024-10-12', service: 'Cirugía menor', total: 1200 },
+    { id: 8, patient: 'Luis Gómez', date: '2024-10-15', service: 'Terapia física', total: 700 },
   ]);
 
   const [filteredSales, setFilteredSales] = useState(sales);

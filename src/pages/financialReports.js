@@ -25,6 +25,7 @@ const FinancialReports = () => {
     { id: 1, patient: 'Juan Pérez', date: '2024-04-02', serviceType: 'Consulta', total: 300 },
     { id: 2, patient: 'Ana López', date: '2024-04-05', serviceType: 'Examen', total: 500 },
     { id: 3, patient: 'Carlos Ruiz', date: '2024-04-12', serviceType: 'Radiografía', total: 800 },
+    { id: 6, patient: 'Laura Rodriguez', date: '2023-01-02', serviceType: 'Consulta', total: 650},
   ];
 
   const [filteredPurchases, setFilteredPurchases] = useState(purchasesData);

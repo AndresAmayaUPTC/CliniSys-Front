@@ -31,9 +31,10 @@ const Inventory = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/inventario`);
-      if (response.data && Array.isArray(response.data)) {
-        setProducts(response.data);
-        setFilteredProducts(response.data);
+      // Acceder al campo "data" que contiene el arreglo de productos
+      if (response.data && Array.isArray(response.data.data)) {
+        setProducts(response.data.data); // Usar response.data.data
+        setFilteredProducts(response.data.data); // Usar response.data.data
         setShowError(false);
       } else {
         setErrorMessage('Error al cargar los productos. Formato de respuesta inválido.');

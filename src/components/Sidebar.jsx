@@ -28,7 +28,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/" className="nav-link" onClick={toggleSidebar}>
+              <Link to="/records" className="nav-link" onClick={toggleSidebar}>
                 <FileText size={18} className="me-2" />
                 Historias
               </Link>

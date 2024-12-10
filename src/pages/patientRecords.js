@@ -12,6 +12,7 @@ const PatientRecordsPage = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showPatientModal, setShowPatientModal] = useState(false);
   const [showRecordModal, setShowRecordModal] = useState(false);
+  const [showAddRecordModal, setShowAddRecordModal] = useState(false);
   const [patientForm, setPatientForm] = useState({ nombre: '', apellido: '', fechaNac: '', telefono: '', email: '' });
   const [recordForm, setRecordForm] = useState({ descripcion: '', fechaCreacion: '' });
   const [records, setRecords] = useState([]);
@@ -112,9 +113,10 @@ const PatientRecordsPage = () => {
       });
       if (response.data.status === 'OK') {
         setRecords([...records, response.data.data]);
-        setShowRecordModal(false);
+        setShowAddRecordModal(false);
         setRecordForm({ descripcion: '', fechaCreacion: '' });
         setSuccessMessage('Historia clínica agregada correctamente');
+        fetchRecords(selectedPatient.id);
       } else {
         setErrorMessage('Error al agregar la historia clínica');
       }
@@ -132,7 +134,7 @@ const PatientRecordsPage = () => {
       });
       if (response.data.status === 'OK') {
         setRecords(records.map(r => r.id === recordForm.id ? response.data.data : r));
-        setShowRecordModal(false);
+        setShowAddRecordModal(false);
         setRecordForm({ descripcion: '', fechaCreacion: '' });
         setIsEditing(false);
         setSuccessMessage('Historia clínica actualizada correctamente');
@@ -303,7 +305,7 @@ const PatientRecordsPage = () => {
           <Button variant="primary" className="mb-3" onClick={() => {
             setIsEditing(false);
             setRecordForm({ descripcion: '', fechaCreacion: '' });
-            setShowRecordModal(true);
+            setShowAddRecordModal(true);
           }}>
             <Plus size={18} className="me-2" />
             Agregar Historia Clínica
@@ -329,7 +331,7 @@ const PatientRecordsPage = () => {
                     <Button variant="link" className="text-primary p-0 me-2" onClick={() => {
                       setIsEditing(true);
                       setRecordForm(record);
-                      setShowRecordModal(true);
+                      setShowAddRecordModal(true);
                     }}>
                       <Edit2 size={18} />
                     </Button>
@@ -345,7 +347,7 @@ const PatientRecordsPage = () => {
       </Modal>
 
       {/* Modal para agregar/editar historia clínica */}
-      <Modal show={showRecordModal} onHide={() => setShowRecordModal(false)}>
+      <Modal show={showAddRecordModal} onHide={() => setShowAddRecordModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{isEditing ? 'Editar Historia Clínica' : 'Agregar Historia Clínica'}</Modal.Title>
         </Modal.Header>
@@ -354,8 +356,7 @@ const PatientRecordsPage = () => {
             <Form.Group className="mb-3">
               <Form.Label>Descripción</Form.Label>
               <Form.Control
-                as
-="textarea"
+                as="textarea"
                 rows={3}
                 value={recordForm.descripcion}
                 onChange={(e) => setRecordForm({...recordForm, descripcion: e.target.value})}
@@ -372,7 +373,7 @@ const PatientRecordsPage = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowRecordModal(false)}>
+          <Button variant="secondary" onClick={() => setShowAddRecordModal(false)}>
             Cancelar
           </Button>
           <Button variant="primary" onClick={isEditing ? handleEditRecord : handleAddRecord}>

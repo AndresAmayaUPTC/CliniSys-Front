@@ -1,38 +1,69 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import { User, Mail, Lock, CreditCard } from 'lucide-react';
+import { User, Lock, Mail } from 'lucide-react';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    userType: '',
-    email: '',
-    username: '',
-    documentType: '',
-    documentNumber: '',
-    password: '',
-    confirmPassword: '',
+    nombreUsuario: '',
+    contrasena: '',
+    confirmarContrasena: '',
+    correo: '',
   });
   const [showError, setShowError] = useState(false);
+  const [showPasswordError, setShowPasswordError] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (Object.values(formData).some(field => field === '')) {
+
+    // Validaciones básicas
+    if (!formData.nombreUsuario || !formData.contrasena || !formData.confirmarContrasena || !formData.correo) {
       setShowError(true);
-    } else if (formData.password !== formData.confirmPassword) {
-      setShowError(true);
-      alert('Las contraseñas no coinciden');
+    } else if (formData.contrasena !== formData.confirmarContrasena) {
+      setShowPasswordError(true);
     } else {
       setShowError(false);
-      console.log('Datos de registro:', formData);
-      // Aquí va la lógica para enviar los datos al servidor
+      setShowPasswordError(false);
+
+      try {
+        // Enviar los datos al servidor, omitiendo el campo correo (no lo enviamos al backend)
+        const response = await fetch('https://hospital-hospital.up.railway.app/usuario', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nombreUsuario: formData.nombreUsuario,
+            contrasena: formData.contrasena,
+            // El correo no se enviará al servidor
+          }),
+        });
+
+        if (response.ok) {
+          setSuccessMessage(true);
+          setFormData({
+            nombreUsuario: '',
+            contrasena: '',
+            confirmarContrasena: '',
+            correo: '',
+          });
+        } else {
+          setSuccessMessage(false);
+          alert('Error al registrar el usuario.');
+        }
+      } catch (error) {
+        setSuccessMessage(false);
+        console.error('Error:', error);
+        alert('Hubo un problema al conectar con el servidor.');
+      }
     }
   };
 
@@ -43,28 +74,29 @@ const RegisterPage = () => {
           <Card className="shadow-lg">
             <Card.Body className="p-5">
               <div className="text-center mb-4">
-               
                 <h2 className="font-weight-bold text-primary">CLINISYS</h2>
                 <p className="text-muted">Registro de Usuario</p>
               </div>
-              
+
               {showError && (
                 <Alert variant="danger">
                   Por favor, complete todos los campos correctamente.
                 </Alert>
               )}
 
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Tipo de Usuario</Form.Label>
-                  <Form.Select name="userType" value={formData.userType} onChange={handleChange}>
-                    <option value="">Seleccione un tipo</option>
-                    <option value="doctor">Doctor</option>
-                    <option value="patient">Paciente</option>
-                    <option value="admin">Administrador</option>
-                  </Form.Select>
-                </Form.Group>
+              {showPasswordError && (
+                <Alert variant="danger">
+                  Las contraseñas no coinciden. Por favor, verifícalas.
+                </Alert>
+              )}
 
+              {successMessage && (
+                <Alert variant="success">
+                  Usuario registrado con éxito.
+                </Alert>
+              )}
+
+              <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                   <Form.Label>Correo Electrónico</Form.Label>
                   <div className="input-group">
@@ -73,9 +105,9 @@ const RegisterPage = () => {
                     </span>
                     <Form.Control
                       type="email"
-                      name="email"
+                      name="correo"
                       placeholder="Ingrese su correo electrónico"
-                      value={formData.email}
+                      value={formData.correo}
                       onChange={handleChange}
                     />
                   </div>
@@ -89,43 +121,13 @@ const RegisterPage = () => {
                     </span>
                     <Form.Control
                       type="text"
-                      name="username"
+                      name="nombreUsuario"
                       placeholder="Ingrese su nombre de usuario"
-                      value={formData.username}
+                      value={formData.nombreUsuario}
                       onChange={handleChange}
                     />
                   </div>
                 </Form.Group>
-
-                <Row className="mb-3">
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Tipo de Documento</Form.Label>
-                      <Form.Select name="documentType" value={formData.documentType} onChange={handleChange}>
-                        <option value="">Seleccione</option>
-                        <option value="CC">C.C</option>
-                        <option value="TI">T.I</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Número de Documento</Form.Label>
-                      <div className="input-group">
-                        <span className="input-group-text">
-                          <CreditCard size={18} />
-                        </span>
-                        <Form.Control
-                          type="text"
-                          name="documentNumber"
-                          placeholder="Número"
-                          value={formData.documentNumber}
-                          onChange={handleChange}
-                        />
-                      </div>
-                    </Form.Group>
-                  </Col>
-                </Row>
 
                 <Form.Group className="mb-3">
                   <Form.Label>Contraseña</Form.Label>
@@ -135,9 +137,9 @@ const RegisterPage = () => {
                     </span>
                     <Form.Control
                       type="password"
-                      name="password"
+                      name="contrasena"
                       placeholder="Ingrese su contraseña"
-                      value={formData.password}
+                      value={formData.contrasena}
                       onChange={handleChange}
                     />
                   </div>
@@ -151,9 +153,9 @@ const RegisterPage = () => {
                     </span>
                     <Form.Control
                       type="password"
-                      name="confirmPassword"
+                      name="confirmarContrasena"
                       placeholder="Confirme su contraseña"
-                      value={formData.confirmPassword}
+                      value={formData.confirmarContrasena}
                       onChange={handleChange}
                     />
                   </div>
@@ -165,7 +167,12 @@ const RegisterPage = () => {
               </Form>
 
               <div className="text-center mt-3">
-                <p className="mb-0">¿Ya tiene una cuenta? <a href="/login" className="text-primary">Inicie sesión aquí</a></p>
+                <p className="mb-0">
+                  ¿Ya tiene una cuenta?{' '}
+                  <a href="/login" className="text-primary">
+                    Inicie sesión aquí
+                  </a>
+                </p>
               </div>
             </Card.Body>
           </Card>
